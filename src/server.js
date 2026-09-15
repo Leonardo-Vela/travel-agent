@@ -2,7 +2,6 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import {
-  BROKEN_ENABLED,
   CATALOG,
   REFERENCE_ENABLED,
   datasetTables,
@@ -32,7 +31,7 @@ app.get("/api/tools", (_req, res) => {
 
   res.json({
     tools,
-    default_enabled: Array.from(BROKEN_ENABLED)
+    default_enabled: Array.from(REFERENCE_ENABLED)
   });
 });
 
