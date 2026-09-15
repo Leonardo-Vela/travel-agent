@@ -1,16 +1,14 @@
 {
   "name": "travel-agent-js",
   "version": "0.1.0",
-  "description": "Standalone JavaScript port of the travel workshop agent with one callable function and optional API server.",
+  "description": "Next.js travel-agent app with Vercel-ready API routes.",
+  "private": true,
   "type": "module",
-  "main": "src/index.js",
-  "exports": {
-    ".": "./src/index.js",
-    "./server": "./src/server.js"
-  },
   "scripts": {
-    "dev": "node --watch src/server.js",
-    "start": "node src/server.js",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
     "test": "node --test"
   },
   "keywords": [
@@ -24,9 +22,13 @@
     "node": ">=20"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "openai": "^4.63.0"
+    "next": "^15.4.2",
+    "openai": "^4.63.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.4.2"
   }
 }
