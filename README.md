@@ -57,6 +57,19 @@ npm run dev
 - `BACKEND_OPENAI_MODEL` (optional override)
 3. Deploy.
 
+### GitHub import checklist (website)
+
+1. In Vercel, click `Add New...` -> `Project` and pick `Leonardo-Vela/travel-agent`.
+2. Keep framework preset as `Next.js`.
+3. Build settings should stay default:
+- Install Command: `npm install`
+- Build Command: `npm run build`
+- Output: auto
+4. Add the environment variables before first production deploy.
+5. Deploy and validate:
+- `GET /api/health`
+- `POST /api/chat`
+
 No custom server is required for Vercel.
 
 ## Tests

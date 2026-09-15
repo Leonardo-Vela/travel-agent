@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { CATALOG, REFERENCE_ENABLED, splitDescription } from "../../../src/tools.js";
 
+export const runtime = "nodejs";
+
 export async function GET() {
   const tools = CATALOG.map((spec) => {
     const [description, example] = splitDescription(spec.description);

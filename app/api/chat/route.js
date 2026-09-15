@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { REFERENCE_ENABLED } from "../../../src/tools.js";
 import { runTravelAgent } from "../../../src/agent.js";
 
+export const runtime = "nodejs";
+
 export async function POST(request) {
   try {
     const body = await request.json();
