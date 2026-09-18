@@ -32,6 +32,10 @@ function toOpenAITools(selectedTools) {
   }));
 }
 
+const PLANNING_PROMPT = `Create a concise execution plan before answering the user's travel question.
+
+State the facts that must be found, the tool sequence, and any required calculation. Do not answer the question yet, do not invent facts, and do not call tools in this planning step. Keep the plan to at most four short bullet points.`;
+
 export async function runTravelAgent({
   question,
   enabledTools,
@@ -60,10 +64,26 @@ export async function runTravelAgent({
   ];
 
   let answer = "";
+  let plan = "";
   const trace = [];
   let toolCalls = 0;
   let errorCalls = 0;
   const complex = isComplexQuestion(inputQuestion);
+
+  const planningCompletion = await client.chat.completions.create({
+    model,
+    messages: [
+      ...messages,
+      { role: "system", content: PLANNING_PROMPT }
+    ],
+    temperature: 0
+  });
+
+  plan = String(planningCompletion.choices?.[0]?.message?.content || "").trim();
+  if (plan) {
+    trace.push({ type: "plan", content: plan });
+    messages.push({ role: "assistant", content: `Execution plan:\n${plan}` });
+  }
 
   for (let step = 0; step < maxSteps; step += 1) {
     const completion = await client.chat.completions.create({
@@ -142,6 +162,7 @@ export async function runTravelAgent({
   return {
     status: "ok",
     answer,
+    plan,
     trace,
     tool_calls: toolCalls,
     error_calls: errorCalls

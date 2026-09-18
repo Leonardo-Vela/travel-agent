@@ -216,6 +216,26 @@ button, input, textarea {
   padding: 10px 12px;
 }
 
+.execution-plan {
+  margin: 0 0 10px;
+  border: 1px solid #d9e4ec;
+  border-radius: 8px;
+  background: #f4f8fa;
+  padding: 8px 10px;
+}
+
+.execution-plan summary {
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.execution-plan > div {
+  margin-top: 8px;
+  white-space: pre-wrap;
+}
+
 .reasoning-trace > summary {
   display: flex;
   align-items: center;

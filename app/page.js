@@ -207,6 +207,7 @@ export default function HomePage() {
       const assistantMessage = {
         role: "assistant",
         content: data.answer || "No answer returned.",
+        plan: data.plan || "",
         trace: toolTrace
       };
       setMessages((prev) => [...prev, assistantMessage]);
@@ -253,6 +254,12 @@ export default function HomePage() {
             {messages.map((msg, index) => (
               <div key={`${msg.role}-${index}`} className={`message ${msg.role}`}>
                 <div className="bubble">
+                  {msg.role === "assistant" && msg.plan ? (
+                    <details className="execution-plan">
+                      <summary>Execution plan</summary>
+                      <div>{msg.plan}</div>
+                    </details>
+                  ) : null}
                   {msg.role === "assistant" ? renderAssistantContent(msg.content) : msg.content}
                   {msg.role === "assistant" && msg.trace && msg.trace.length > 0 ? (
                     <details className="reasoning-trace" open={false}>
