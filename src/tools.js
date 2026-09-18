@@ -318,7 +318,7 @@ export const CATALOG = [
     id: "list_districts",
     name: "list_districts",
     group: "Directory",
-    description: "List districts of one city. Example: list_districts('London').",
+    description: "List districts of one city. Required bridge before listing hotels by city: call this with the city, then call list_hotels once for each returned district. Example: list_districts('London').",
     parameters: {
       type: "object",
       properties: { city: { type: "string" } },
@@ -423,7 +423,7 @@ export const CATALOG = [
     id: "list_hotels",
     name: "list_hotels",
     group: "Hotels",
-    description: "List hotels in one district with nightly per-person rates.",
+    description: "List hotels in one district with nightly per-person rates. Input must be a district, never a city; to find a city's cheapest hotel, call list_districts(city), list_hotels for every returned district, then compare nightly prices.",
     parameters: { type: "object", properties: { district: { type: "string" } }, required: ["district"], additionalProperties: false },
     impl: listHotels
   },
@@ -455,7 +455,7 @@ export const CATALOG = [
     id: "get_exchange_rate",
     name: "get_exchange_rate",
     group: "Cost",
-    description: "Current mock exchange rate tool; for implied/breakeven rates combine with calculator (rate = target/source).",
+    description: "Current mock exchange rate tool. Use this when the question asks for increase/decrease/change compared to the CURRENT EUR/foreign-currency rate. If the question asks only for a required target or breakeven rate from a budget constraint, do NOT use this first; derive the target rate from tool data and calculator. Direction matters: for a question phrased '1 EUR worth in CHF', calculate total CHF / EUR budget, yielding CHF per EUR; never invert it to EUR per CHF.",
     parameters: {
       type: "object",
       properties: { from_currency: { type: "string" }, to_currency: { type: "string" } },
@@ -486,7 +486,7 @@ export const CATALOG = [
     id: "calculator",
     name: "calculator",
     group: "Cost",
-    description: "Arithmetic tool for all numeric operations.",
+    description: "Arithmetic tool for numeric expressions only: pass digits and operators without units or explanatory text (for example '3 * 190', then '570 / 300'). For a question 'How much should 1 EUR be worth in CHF?', calculate target_CHF_per_EUR = total_CHF_cost / EUR_budget, never EUR_budget / total_CHF_cost. Example: 570 CHF / 300 EUR = 1.90 CHF per EUR. If a current-rate comparison is requested, compute delta = target_rate - current_rate and percent_change = delta / current_rate * 100.",
     parameters: { type: "object", properties: { expression: { type: "string" } }, required: ["expression"], additionalProperties: false },
     impl: calculator
   },
