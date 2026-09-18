@@ -486,7 +486,7 @@ export const CATALOG = [
     id: "calculator",
     name: "calculator",
     group: "Cost",
-    description: "Arithmetic tool for numeric expressions only: pass digits and operators without units or explanatory text (for example '3 * 190', then '570 / 300'). For a question 'How much should 1 EUR be worth in CHF?', calculate target_CHF_per_EUR = total_CHF_cost / EUR_budget, never EUR_budget / total_CHF_cost. Example: 570 CHF / 300 EUR = 1.90 CHF per EUR. If a current-rate comparison is requested, compute delta = target_rate - current_rate and percent_change = delta / current_rate * 100.",
+    description: "Evaluate arithmetic needed to combine or compare verified travel facts.",
     parameters: { type: "object", properties: { expression: { type: "string" } }, required: ["expression"], additionalProperties: false },
     impl: calculator
   },
@@ -517,6 +517,29 @@ export const CATALOG = [
 ];
 
 export const CATALOG_BY_ID = Object.fromEntries(CATALOG.map((s) => [s.id, s]));
+export const TOOL_DETAILS = {
+  get_airport_code: "Reads table:cities. Use it to translate a city into the airport code required by flight tools.",
+  list_districts: "Reads table:districts. Use it before comparing hotels or activities across a city.",
+  get_district: "Reads table:districts. Use it to identify the city for a known district.",
+  get_airport_transfer_time: "Reads table:districts. Use it with schedules and time_math to check arrival deadlines.",
+  get_currency: "Reads table:cities. Use it to interpret local hotel and activity prices before comparing costs.",
+  get_weather: "Reads table:weather. Use it for the current temperature in a city.",
+  get_climate_average: "Reads table:climate. Use it only for historical seasonal averages, not current conditions.",
+  get_flight: "Reads table:flights. Use it for the round-trip price and travel time for an airport.",
+  get_one_way_fare: "Reads table:flights. Use it when the question specifically needs a one-way ticket.",
+  get_flight_leg: "Reads table:flight_legs. Use it for a direct route between HOME and airport codes.",
+  get_flight_schedule: "Reads table:departures. Use it with time_math for departure or arrival constraints.",
+  list_hotels: "Reads table:hotels. Accepts one district and returns nightly per-person prices for comparisons.",
+  get_hotel: "Reads table:hotels. Use it to retrieve the price and rating of a named hotel.",
+  list_activities: "Reads table:activities. Use it to list local activities and their prices for one district.",
+  get_activity_price: "Reads table:activities. Use it to retrieve the price of one named activity.",
+  get_exchange_rate: "Reads table:exchange_rates. Use it for the current mock conversion rate between two currencies.",
+  time_math: "Uses verified clock times. Use it for time addition, subtraction, differences, and deadline comparisons.",
+  calculator: "Uses verified numeric values only. Provide a bare arithmetic expression; use the result for totals, rates, or comparisons.",
+  get_trip_cost: "Reads table:flights and table:hotels. This is a simplified estimate and omits currency conversion and activities.",
+  plan_vacation: "Reads several travel tables. This broad summary is less precise than selecting the focused tools needed for a question.",
+  get_checkin_rule: "Reads the airport check-in policy. Use it with schedules and time_math to determine airport arrival time."
+};
 export const BROKEN_ENABLED = new Set(["get_exchange_rate"]);
 export const REFERENCE_ENABLED = new Set([
   "get_airport_code",
@@ -538,7 +561,9 @@ export function buildToolbox(enabledIds, descriptions = {}) {
   const enabled = new Set(enabledIds);
   const selected = CATALOG.filter((tool) => enabled.has(tool.id)).map((tool) => ({
     ...tool,
-    effectiveDescription: String(descriptions[tool.id] || "").trim() || tool.description
+    overview: String(descriptions[tool.id] || "").trim() || tool.description,
+    details: TOOL_DETAILS[tool.name] || "Use this tool only when its result is needed to answer the question.",
+    effectiveDescription: `${String(descriptions[tool.id] || "").trim() || tool.description}\n\nDetails: ${TOOL_DETAILS[tool.name] || "Use this tool only when its result is needed to answer the question."}`
   }));
   const meta = Object.fromEntries(selected.map((tool) => [tool.name, tool.group]));
   return { tools: selected, meta };
@@ -623,18 +648,18 @@ export function datasetTables() {
     "1 unit in EUR": Number((1 / per).toFixed(4))
   }));
 
-  return {
-    "Cities (city -> airport, currency)": cities,
-    "City temperature": temperature,
-    "City conditions": conditions,
-    "Flights (by airport, EUR)": flights,
-    "Flight legs (by airport, EUR)": legs,
-    "Departures (by airport)": schedule,
-    "Districts (district -> city)": districts,
-    "Hotels (by district, local currency)": hotels,
-    "Activities (by district, local currency)": activities,
-    "Exchange rates": exchange
-  };
+  return [
+    { name: "table:cities", label: "Cities", description: "City, country, airport code, and local currency.", rows: cities },
+    { name: "table:weather", label: "Weather", description: "Current and historical city temperatures.", rows: temperature },
+    { name: "table:conditions", label: "Conditions", description: "Daily rain chance, sunrise, and sunset.", rows: conditions },
+    { name: "table:flights", label: "Flights", description: "Airport-based one-way and round-trip fares.", rows: flights },
+    { name: "table:flight_legs", label: "Flight legs", description: "Direct route fares and durations.", rows: legs },
+    { name: "table:departures", label: "Departures", description: "Scheduled Home-to-airport departure and arrival times.", rows: schedule },
+    { name: "table:districts", label: "Districts", description: "District-to-city mapping and airport transfer time.", rows: districts },
+    { name: "table:hotels", label: "Hotels", description: "District-level nightly hotel prices and ratings.", rows: hotels },
+    { name: "table:activities", label: "Activities", description: "District-level activity prices.", rows: activities },
+    { name: "table:exchange_rates", label: "Exchange rates", description: "Mock currency baselines relative to EUR.", rows: exchange }
+  ];
 }
 
 export function splitDescription(desc) {

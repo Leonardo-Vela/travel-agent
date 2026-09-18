@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildToolbox, CATALOG_BY_ID, REFERENCE_ENABLED } from "../src/tools.js";
+import { verifiedTargetRate } from "../src/agent.js";
 
 test("reference tools include schedule and time math", () => {
   assert.equal(REFERENCE_ENABLED.has("get_flight_schedule"), true);
@@ -43,4 +44,25 @@ test("exchange rate returns the requested current conversion rate", () => {
   });
 
   assert.equal(out, "Current mock exchange rate: 1 GBP = 1.1765 EUR.");
+});
+
+test("target-rate answers use the verified calculator result in the requested direction", () => {
+  const targetRate = verifiedTargetRate(
+    "I have a budget of 300 EUR. How much should 1 EUR be worth in CHF?",
+    [
+      { type: "tool", name: "calculator", args: { expression: "3 * 190" }, result: "570" },
+      { type: "tool", name: "calculator", args: { expression: "570 / 300" }, result: "1.9" }
+    ]
+  );
+
+  assert.deepEqual(targetRate, { from: "EUR", to: "CHF", rate: 1.9 });
+});
+
+test("target-rate answers correct an inverse calculator call", () => {
+  const targetRate = verifiedTargetRate(
+    "I have a budget of 300 EUR. How much should 1 EUR be worth in CHF?",
+    [{ type: "tool", name: "calculator", args: { expression: "300 / 570" }, result: "0.53" }]
+  );
+
+  assert.deepEqual(targetRate, { from: "EUR", to: "CHF", rate: 1.9 });
 });

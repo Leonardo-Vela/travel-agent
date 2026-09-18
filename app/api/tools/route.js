@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CATALOG, REFERENCE_ENABLED, splitDescription } from "../../../src/tools.js";
+import { CATALOG, REFERENCE_ENABLED, TOOL_DETAILS, splitDescription } from "../../../src/tools.js";
 
 export const runtime = "nodejs";
 
@@ -11,6 +11,7 @@ export async function GET() {
       name: spec.name,
       group: spec.group,
       description,
+      details: TOOL_DETAILS[spec.name] || "Use this tool only when its result is needed to answer the question.",
       example
     };
   });

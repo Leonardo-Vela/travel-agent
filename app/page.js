@@ -35,7 +35,7 @@ function renderAssistantContent(content) {
   });
 }
 
-const TOOL_CONFIG_KEY = "travel-agent-tool-config-v2";
+const TOOL_CONFIG_KEY = "travel-agent-tool-config-v3";
 
 const TOOL_GROUPS = ["Directory", "Weather", "Flights", "Hotels", "Activities", "Cost"];
 
@@ -390,6 +390,7 @@ export default function HomePage() {
                           <div className="tool-description">
                             {descriptions[tool.id] || tool.description}
                           </div>
+                          {tool.details ? <div className="tool-description">Details: {tool.details}</div> : null}
                         </div>
                       </div>
                     ))}
@@ -399,11 +400,13 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="ribbon-body">
-              {Object.entries(dataTables).map(([title, rows]) => {
+              {dataTables.map((table) => {
+                const { name, label, description, rows = [] } = table;
                 const columns = rows.length ? Object.keys(rows[0]) : [];
                 return (
-                  <div key={title} className="data-table-wrap">
-                    <div className="group-label">{title}</div>
+                  <div key={name} className="data-table-wrap">
+                    <div className="group-label">{name}</div>
+                    <div className="tool-description">{label}: {description}</div>
                     {rows.length === 0 ? (
                       <div className="tool-description">No rows.</div>
                     ) : (
@@ -412,15 +415,15 @@ export default function HomePage() {
                           <thead>
                             <tr>
                               {columns.map((column) => (
-                                <th key={`${title}-${column}`}>{column}</th>
+                                <th key={`${name}-${column}`}>{column}</th>
                               ))}
                             </tr>
                           </thead>
                           <tbody>
                             {rows.map((row, rowIndex) => (
-                              <tr key={`${title}-row-${rowIndex}`}>
+                              <tr key={`${name}-row-${rowIndex}`}>
                                 {columns.map((column) => (
-                                  <td key={`${title}-${rowIndex}-${column}`}>{String(row[column] ?? "")}</td>
+                                  <td key={`${name}-${rowIndex}-${column}`}>{String(row[column] ?? "")}</td>
                                 ))}
                               </tr>
                             ))}

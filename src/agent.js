@@ -3,6 +3,8 @@ import { AGENT_PROMPT } from "./prompt.js";
 import { buildToolbox, REFERENCE_ENABLED } from "./tools.js";
 
 const TIME_TOKEN_RE = /\b(?:[01]?\d|2[0-3])(?::[0-5]\d)?\s*(?:am|pm)\b|\b(?:[01]\d|2[0-3]):[0-5]\d\b/i;
+const TARGET_RATE_RE = /\b(?:how much should|what should)\s+1\s+([a-z]{3})\s+be worth in\s+([a-z]{3})\b/i;
+const BUDGET_RE = /\bbudget\s*(?:of|is|:)?\s*(\d+(?:\.\d+)?)\s*([a-z]{3})\b/i;
 
 function isComplexQuestion(question) {
   const q = String(question || "").toLowerCase();
@@ -32,13 +34,37 @@ function toOpenAITools(selectedTools) {
   }));
 }
 
+export function verifiedTargetRate(question, trace) {
+  const direction = String(question || "").match(TARGET_RATE_RE);
+  const budget = String(question || "").match(BUDGET_RE);
+  if (!direction || !budget || direction[1].toUpperCase() !== budget[2].toUpperCase()) return null;
+
+  const budgetAmount = Number(budget[1]);
+  const calculation = [...trace].reverse().find((item) => {
+    if (item?.type !== "tool" || item.name !== "calculator") return false;
+    const [numerator, denominator, ...rest] = String(item.args?.expression || "").split("/");
+    if (rest.length !== 0 || !Number.isFinite(Number(numerator)) || !Number.isFinite(Number(denominator))) return false;
+    return Number(numerator) === budgetAmount || Number(denominator) === budgetAmount;
+  });
+  if (!calculation) return null;
+  const [numerator, denominator] = String(calculation.args.expression).split("/").map(Number);
+  const rate = numerator === budgetAmount ? denominator / budgetAmount : Number(calculation.result);
+  if (!Number.isFinite(rate) || rate <= 0) return null;
+
+  return {
+    from: direction[1].toUpperCase(),
+    to: direction[2].toUpperCase(),
+    rate
+  };
+}
+
 const PLANNING_PROMPT = `Create a concise execution plan before answering the user's travel question.
 
 State the facts that must be found, the tool sequence, and any required calculation. Every step that needs a tool must name its intended tool exactly as \`Tools: tool_name\` or \`Tools: tool_name -> next_tool_name\`. Only use tools from the available-tools list. For a calculation step, write \`Tools: calculator\`; use \`Tools: none\` only when no tool is needed. Do not answer the question yet, do not invent facts, and do not call tools in this planning step. Keep the plan to at most four short bullet points.`;
 
 const FINAL_RESPONSE_PROMPT = `Write the final user-facing answer using only the execution plan and verified tool results in this conversation.
 
-Keep it concise, preserve all units and calculation directions, and include a brief derivation for multi-constraint questions. Do not call tools, do not add facts, and do not mention internal planning or model selection.`;
+Keep it concise, preserve all units and calculation directions, and include a brief derivation for multi-constraint questions. A verified monetary amount is not an exchange rate: do not relabel it or derive a new number from it. State a requested exchange rate only when it comes from the verified rate calculation, with its requested currency direction. Do not call tools, do not add facts, and do not mention internal planning or model selection.`;
 
 export async function runTravelAgent({
   question,
@@ -170,6 +196,10 @@ export async function runTravelAgent({
         temperature: 0
       });
       answer = String(finalCompletion.choices?.[0]?.message?.content || content).trim() || content;
+      const targetRate = verifiedTargetRate(inputQuestion, trace);
+      if (targetRate) {
+        answer = `Based on the verified calculation, 1 ${targetRate.from} should be worth ${targetRate.rate} ${targetRate.to}.`;
+      }
       break;
     }
   }
