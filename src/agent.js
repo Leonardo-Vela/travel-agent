@@ -36,11 +36,17 @@ const PLANNING_PROMPT = `Create a concise execution plan before answering the us
 
 State the facts that must be found, the tool sequence, and any required calculation. Do not answer the question yet, do not invent facts, and do not call tools in this planning step. Keep the plan to at most four short bullet points.`;
 
+const FINAL_RESPONSE_PROMPT = `Write the final user-facing answer using only the execution plan and verified tool results in this conversation.
+
+Keep it concise, preserve all units and calculation directions, and include a brief derivation for multi-constraint questions. Do not call tools, do not add facts, and do not mention internal planning or model selection.`;
+
 export async function runTravelAgent({
   question,
   enabledTools,
   toolDescriptions,
   model = process.env.BACKEND_OPENAI_MODEL || process.env.OPENAI_MODEL || "gpt-4o-mini",
+  reasoningModel = process.env.OPENAI_REASONING_MODEL || model,
+  fastModel = process.env.OPENAI_FAST_MODEL || model,
   apiKey = process.env.OPENAI_API_KEY,
   maxSteps = 12
 }) {
@@ -71,7 +77,7 @@ export async function runTravelAgent({
   const complex = isComplexQuestion(inputQuestion);
 
   const planningCompletion = await client.chat.completions.create({
-    model,
+    model: reasoningModel,
     messages: [
       ...messages,
       { role: "system", content: PLANNING_PROMPT }
@@ -87,7 +93,7 @@ export async function runTravelAgent({
 
   for (let step = 0; step < maxSteps; step += 1) {
     const completion = await client.chat.completions.create({
-      model,
+      model: reasoningModel,
       messages,
       tools: openaiTools,
       tool_choice: "auto",
@@ -150,7 +156,16 @@ export async function runTravelAgent({
         });
         continue;
       }
-      answer = content;
+      const finalCompletion = await client.chat.completions.create({
+        model: fastModel,
+        messages: [
+          ...messages,
+          { role: "assistant", content },
+          { role: "system", content: FINAL_RESPONSE_PROMPT }
+        ],
+        temperature: 0
+      });
+      answer = String(finalCompletion.choices?.[0]?.message?.content || content).trim() || content;
       break;
     }
   }
@@ -163,6 +178,8 @@ export async function runTravelAgent({
     status: "ok",
     answer,
     plan,
+    reasoning_model: reasoningModel,
+    fast_model: fastModel,
     trace,
     tool_calls: toolCalls,
     error_calls: errorCalls

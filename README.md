@@ -38,6 +38,8 @@ npm install
 ```bash
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o-mini
+OPENAI_REASONING_MODEL=gpt-5-mini
+OPENAI_FAST_MODEL=gpt-4o-mini
 ```
 
 3. Run dev server:
@@ -55,6 +57,8 @@ npm run dev
 - `OPENAI_API_KEY` (required)
 - `OPENAI_MODEL` (optional)
 - `BACKEND_OPENAI_MODEL` (optional override)
+- `OPENAI_REASONING_MODEL` (optional; used for planning and tool execution)
+- `OPENAI_FAST_MODEL` (optional; used to write the final response)
 3. Deploy.
 
 ### GitHub import checklist (website)
