@@ -36,11 +36,11 @@ test("schedule and time tools support arrival deadlines", () => {
   assert.equal(cmp, "11:30 is before 13:10");
 });
 
-test("exchange rate guidance points to calculator for implied rates", () => {
+test("exchange rate returns the requested current conversion rate", () => {
   const out = CATALOG_BY_ID.get_exchange_rate.impl({
     from_currency: "GBP",
     to_currency: "EUR"
   });
 
-  assert.ok(out.includes("derive the implied rate with calculator"));
+  assert.equal(out, "Current mock exchange rate: 1 GBP = 1.1765 EUR.");
 });

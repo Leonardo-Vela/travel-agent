@@ -113,7 +113,7 @@ function getExchangeRate({ from_currency, to_currency } = {}) {
     return err(`unknown currency. Known currencies: ${Object.keys(EXCHANGE_PER_EUR).join(", ")}.`);
   }
   const rate = Number((EXCHANGE_PER_EUR[b] / EXCHANGE_PER_EUR[a]).toFixed(4));
-  return `Current mock exchange rate: 1 ${a} = ${rate} ${b} (multiply a ${a} amount by ${rate} to get ${b}). For hypothetical target-rate or breakeven-rate questions, derive the implied rate with calculator: rate = target_${b} / source_${a}.`;
+  return `Current mock exchange rate: 1 ${a} = ${rate} ${b}.`;
 }
 
 function getWeather({ city } = {}) {
@@ -455,7 +455,7 @@ export const CATALOG = [
     id: "get_exchange_rate",
     name: "get_exchange_rate",
     group: "Cost",
-    description: "Current mock exchange rate tool. Use this when the question asks for increase/decrease/change compared to the CURRENT EUR/foreign-currency rate. If the question asks only for a required target or breakeven rate from a budget constraint, do NOT use this first; derive the target rate from tool data and calculator. Direction matters: for a question phrased '1 EUR worth in CHF', calculate total CHF / EUR budget, yielding CHF per EUR; never invert it to EUR per CHF.",
+    description: "Return the current mock conversion rate between two ISO currency codes. The result is expressed as the amount of to_currency for 1 unit of from_currency. Use it to convert amounts at the current rate or to compare a target rate against the current rate.",
     parameters: {
       type: "object",
       properties: { from_currency: { type: "string" }, to_currency: { type: "string" } },

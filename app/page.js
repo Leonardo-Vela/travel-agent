@@ -35,7 +35,7 @@ function renderAssistantContent(content) {
   });
 }
 
-const TOOL_CONFIG_KEY = "travel-agent-tool-config-v1";
+const TOOL_CONFIG_KEY = "travel-agent-tool-config-v2";
 
 const TOOL_GROUPS = ["Directory", "Weather", "Flights", "Hotels", "Activities", "Cost"];
 
@@ -187,7 +187,16 @@ export default function HomePage() {
       });
 
       if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+        let message = `Request failed with status ${response.status}`;
+        try {
+          const payload = await response.json();
+          if (payload?.error) {
+            message = String(payload.error);
+          }
+        } catch {
+          // Keep the generic message if the error body is not JSON.
+        }
+        throw new Error(message);
       }
 
       const data = await response.json();
