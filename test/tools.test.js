@@ -35,3 +35,28 @@ test("schedule and time tools support arrival deadlines", () => {
   assert.equal(cutoff, "14:00 - 50 min = 13:10");
   assert.equal(cmp, "11:30 is before 13:10");
 });
+
+test("reverse_exchange_rate derives implied breakeven rate", () => {
+  const out = CATALOG_BY_ID.reverse_exchange_rate.impl({
+    from_amount: "170",
+    to_amount: "200",
+    from_currency: "GBP",
+    to_currency: "EUR"
+  });
+
+  assert.equal(
+    out,
+    "Implied exchange rate from amounts: 170 GBP = 200 EUR => 1 GBP = 1.1765 EUR; 1 EUR = 0.85 GBP."
+  );
+});
+
+test("reverse_exchange_rate validates positive numeric amounts", () => {
+  const out = CATALOG_BY_ID.reverse_exchange_rate.impl({
+    from_amount: "0",
+    to_amount: "200",
+    from_currency: "GBP",
+    to_currency: "EUR"
+  });
+
+  assert.equal(out, "ERROR: provide positive numeric 'from_amount' and 'to_amount'.");
+});
