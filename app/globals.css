@@ -457,7 +457,8 @@ button, input, textarea {
 }
 
 .tool-edit-icon {
-  width: 18px;
+  min-width: 18px;
+  padding: 0 6px;
   height: 18px;
   border-radius: 999px;
   background: #f8efcf;

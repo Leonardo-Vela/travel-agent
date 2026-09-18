@@ -375,7 +375,7 @@ export default function HomePage() {
                             className="tool-edit-button"
                             onClick={() => openToolEditor(tool)}
                           >
-                            <span className="tool-edit-icon" aria-hidden="true">E</span>
+                            <span className="tool-edit-icon" aria-hidden="true">Edit</span>
                             <span className="tool-edit-label">{tool.name}</span>
                           </button>
                           <div className="tool-description">

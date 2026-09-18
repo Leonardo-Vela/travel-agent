@@ -113,25 +113,7 @@ function getExchangeRate({ from_currency, to_currency } = {}) {
     return err(`unknown currency. Known currencies: ${Object.keys(EXCHANGE_PER_EUR).join(", ")}.`);
   }
   const rate = Number((EXCHANGE_PER_EUR[b] / EXCHANGE_PER_EUR[a]).toFixed(4));
-  return `Current mock exchange rate: 1 ${a} = ${rate} ${b} (multiply a ${a} amount by ${rate} to get ${b}). For hypothetical target-rate or breakeven-rate questions, use reverse_exchange_rate.`;
-}
-
-function reverseExchangeRate({ from_amount, to_amount, from_currency, to_currency } = {}) {
-  const a = String(from_currency || "").trim().toUpperCase();
-  const b = String(to_currency || "").trim().toUpperCase();
-  if (!a || !b) {
-    return err("provide both 'from_currency' and 'to_currency'.");
-  }
-
-  const from = Number(from_amount);
-  const to = Number(to_amount);
-  if (!Number.isFinite(from) || from <= 0 || !Number.isFinite(to) || to <= 0) {
-    return err("provide positive numeric 'from_amount' and 'to_amount'.");
-  }
-
-  const rate = Number((to / from).toFixed(4));
-  const inverse = Number((from / to).toFixed(4));
-  return `Implied exchange rate from amounts: ${from} ${a} = ${to} ${b} => 1 ${a} = ${rate} ${b}; 1 ${b} = ${inverse} ${a}.`;
+  return `Current mock exchange rate: 1 ${a} = ${rate} ${b} (multiply a ${a} amount by ${rate} to get ${b}). For hypothetical target-rate or breakeven-rate questions, derive the implied rate with calculator: rate = target_${b} / source_${a}.`;
 }
 
 function getWeather({ city } = {}) {
@@ -473,7 +455,7 @@ export const CATALOG = [
     id: "get_exchange_rate",
     name: "get_exchange_rate",
     group: "Cost",
-    description: "Current mock exchange rate tool.",
+    description: "Current mock exchange rate tool; for implied/breakeven rates combine with calculator (rate = target/source).",
     parameters: {
       type: "object",
       properties: { from_currency: { type: "string" }, to_currency: { type: "string" } },
@@ -481,24 +463,6 @@ export const CATALOG = [
       additionalProperties: false
     },
     impl: getExchangeRate
-  },
-  {
-    id: "reverse_exchange_rate",
-    name: "reverse_exchange_rate",
-    group: "Cost",
-    description: "Derive an implied or breakeven exchange rate from two currency amounts.",
-    parameters: {
-      type: "object",
-      properties: {
-        from_amount: { type: "string" },
-        to_amount: { type: "string" },
-        from_currency: { type: "string" },
-        to_currency: { type: "string" }
-      },
-      required: ["from_amount", "to_amount", "from_currency", "to_currency"],
-      additionalProperties: false
-    },
-    impl: reverseExchangeRate
   },
   {
     id: "time_math",
@@ -566,7 +530,6 @@ export const REFERENCE_ENABLED = new Set([
   "list_hotels",
   "list_activities",
   "get_exchange_rate",
-  "reverse_exchange_rate",
   "time_math",
   "calculator"
 ]);

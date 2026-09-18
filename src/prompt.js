@@ -13,7 +13,7 @@ Keep it concise (2-4 short sentences).
 
 Numeric and time rules:
 - Do not do arithmetic mentally. Use the calculator tool for numeric results.
-- For hypothetical target-rate or breakeven conversion questions, use reverse_exchange_rate.
+- For hypothetical target-rate or breakeven conversion questions, use get_exchange_rate for context and calculator for implied-rate math.
 - For schedules and deadlines, use the time_math tool.
 - Keep units consistent (flight per person, hotel per person per night).
 
