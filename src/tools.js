@@ -375,6 +375,14 @@ export const CATALOG = [
     impl: getWeather
   },
   {
+    id: "get_conditions",
+    name: "get_conditions",
+    group: "Weather",
+    description: "Today's rain chance, sunrise, and sunset for a city.",
+    parameters: { type: "object", properties: { city: { type: "string" } }, required: ["city"], additionalProperties: false },
+    impl: getConditions
+  },
+  {
     id: "get_climate_average",
     name: "get_climate_average",
     group: "Weather",
@@ -524,6 +532,7 @@ export const TOOL_DETAILS = {
   get_airport_transfer_time: "Reads table:districts. Use it with schedules and time_math to check arrival deadlines.",
   get_currency: "Reads table:cities. Use it to interpret local hotel and activity prices before comparing costs.",
   get_weather: "Reads table:weather. Use it for the current temperature in a city.",
+  get_conditions: "Reads table:conditions. Use it for today's sunrise, sunset, or rain chance; combine sunset with time_math for time-based arrival requirements.",
   get_climate_average: "Reads table:climate. Use it only for historical seasonal averages, not current conditions.",
   get_flight: "Reads table:flights. Use it for the round-trip price and travel time for an airport.",
   get_one_way_fare: "Reads table:flights. Use it when the question specifically needs a one-way ticket.",
@@ -548,6 +557,7 @@ export const REFERENCE_ENABLED = new Set([
   "get_airport_transfer_time",
   "get_currency",
   "get_weather",
+  "get_conditions",
   "get_flight",
   "get_flight_schedule",
   "list_hotels",

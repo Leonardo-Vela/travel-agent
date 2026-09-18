@@ -7,6 +7,12 @@ test("reference tools include schedule and time math", () => {
   assert.equal(REFERENCE_ENABLED.has("get_flight_schedule"), true);
   assert.equal(REFERENCE_ENABLED.has("time_math"), true);
   assert.equal(REFERENCE_ENABLED.has("get_airport_transfer_time"), true);
+  assert.equal(REFERENCE_ENABLED.has("get_conditions"), true);
+});
+
+test("conditions tool returns a city's sunset", () => {
+  const out = CATALOG_BY_ID.get_conditions.impl({ city: "Barcelona" });
+  assert.ok(out.includes("sunset 20:30"));
 });
 
 test("time_math compare does not require minutes", () => {
