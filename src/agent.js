@@ -34,7 +34,7 @@ function toOpenAITools(selectedTools) {
 
 const PLANNING_PROMPT = `Create a concise execution plan before answering the user's travel question.
 
-State the facts that must be found, the tool sequence, and any required calculation. Do not answer the question yet, do not invent facts, and do not call tools in this planning step. Keep the plan to at most four short bullet points.`;
+State the facts that must be found, the tool sequence, and any required calculation. Every step that needs a tool must name its intended tool exactly as \`Tools: tool_name\` or \`Tools: tool_name -> next_tool_name\`. Only use tools from the available-tools list. For a calculation step, write \`Tools: calculator\`; use \`Tools: none\` only when no tool is needed. Do not answer the question yet, do not invent facts, and do not call tools in this planning step. Keep the plan to at most four short bullet points.`;
 
 const FINAL_RESPONSE_PROMPT = `Write the final user-facing answer using only the execution plan and verified tool results in this conversation.
 
@@ -80,6 +80,10 @@ export async function runTravelAgent({
     model: reasoningModel,
     messages: [
       ...messages,
+      {
+        role: "system",
+        content: `Available tools for this request: ${selectedTools.map((tool) => tool.name).join(", ") || "none"}.`
+      },
       { role: "system", content: PLANNING_PROMPT }
     ],
     temperature: 0
