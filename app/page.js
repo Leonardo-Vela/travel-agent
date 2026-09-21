@@ -7,17 +7,13 @@ const TOOL_ACTIONS = {
   get_weather: "Checking current weather",
   get_climate_average: "Checking historical climate",
   get_flight: "Looking up a round-trip flight",
-  get_one_way_fare: "Looking up a one-way fare",
-  get_flight_leg: "Looking up a flight leg",
   get_flight_schedule: "Checking flight times",
   list_hotels: "Listing hotels",
   get_hotel: "Looking up a hotel",
   find_hotels_in_budget: "Filtering hotels by budget",
   get_activity_price: "Looking up an activity price",
   list_activities: "Listing activities",
-  get_trip_cost: "Bundling a trip cost",
   get_checkin_rule: "Checking the check-in rule",
-  plan_vacation: "Dumping everything about a city"
 };
 
 function toolLabel(name) {
@@ -35,7 +31,7 @@ function renderAssistantContent(content) {
   });
 }
 
-const TOOL_CONFIG_KEY = "travel-agent-tool-config-v3";
+const TOOL_CONFIG_KEY = "travel-agent-tool-config-v4";
 
 const TOOL_GROUPS = ["Directory", "Weather", "Flights", "Hotels", "Activities", "Cost"];
 
@@ -235,8 +231,8 @@ export default function HomePage() {
       <header className="app-header">
         <div className="app-header-inner">
           <h1>
-            <strong className="header-title-main">Agentic Vacation Planning</strong>
-            <span className="header-title-sub">Travel Agent</span>
+            <strong className="header-title-main">PO Offsite 2026:</strong>
+            <span className="header-title-sub"> Agentic vacation planning</span>
           </h1>
         </div>
       </header>

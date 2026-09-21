@@ -5,14 +5,11 @@ import {
   CITY_INFO,
   CLIMATE_AVG,
   CONDITIONS,
-  CITIES,
   DISTRICTS,
   EXCHANGE_PER_EUR,
   HOTELS,
-  LEGS,
   SCHEDULE,
-  WEATHER,
-  legKey
+  WEATHER
 } from "./data.js";
 
 const norm = (s) => String(s || "").trim().toLowerCase();
@@ -145,24 +142,6 @@ function getFlight({ airport } = {}) {
   return `Round-trip Home↔${code}: €${info.oneway * 2} per person, ${info.duration} each way. IMPORTANT: flight is per person and must NOT be multiplied by nights. [FLIGHT_ROUNDTRIP_PER_PERSON_EUR=${info.oneway * 2}]`;
 }
 
-function getOneWayFare({ airport } = {}) {
-  const code = resolveAirport(airport);
-  if (!code) return err(`'${airport}' is not an airport code. Fares are keyed by code (${codesList()}) - use get_airport_code(city) first.`);
-  return `One-way Home→${code}: €${AIRPORTS[code].oneway} (single ticket, no return leg)`;
-}
-
-function getFlightLeg({ origin, destination } = {}) {
-  const a = norm(origin);
-  const b = norm(destination);
-  if (!a || !b) return err("provide both 'origin' and 'destination' as airport codes or Home.");
-  const ra = a === "home" ? "HOME" : resolveAirport(origin);
-  const rb = b === "home" ? "HOME" : resolveAirport(destination);
-  if (!ra || !rb) return err(`legs are keyed by airport code. Points: Home, ${codesList()}. Use get_airport_code(city) to translate a city name.`);
-  const leg = LEGS[legKey(ra, rb)];
-  if (!leg) return err(`no direct flight between ${ra} and ${rb}.`);
-  return `${ra}→${rb}: €${leg[0]}, ${leg[1]}`;
-}
-
 function getFlightSchedule({ airport } = {}) {
   const code = resolveAirport(airport);
   if (!code) return err(`'${airport}' is not an airport code. Schedules are keyed by code (${codesList()}) - use get_airport_code(city) first.`);
@@ -272,34 +251,6 @@ function getCheckinRule() {
   return `Be at the airport ${CHECKIN_MINUTES} minutes before departure for these routes.`;
 }
 
-function getTripCost({ city, nights } = {}) {
-  const key = resolveCity(city);
-  if (!key) return err(`no trip data for '${city}'. Cities: ${cityList()}.`);
-  const n = Number(nights);
-  if (!Number.isFinite(n)) return err("provide a numeric number of 'nights', e.g. 4.");
-  const code = CITY_INFO[key].airport;
-  const flight = AIRPORTS[code].oneway * 2;
-  const firstDistrict = districtsOf(key)[0];
-  const [hotelName, hotelPrice] = HOTELS[firstDistrict][0];
-  const cur = currencyOfCity(key);
-  const total = flight + hotelPrice * Math.trunc(n);
-  return `${title(key)} ${Math.trunc(n)} nights: €${total} (round-trip flight + ${hotelName} at ${money(hotelPrice, cur)}/night; currencies not converted; activities not included)`;
-}
-
-function planVacation({ city } = {}) {
-  const key = resolveCity(city);
-  if (!key) return err(`no data for '${city}'. Cities: ${cityList()}.`);
-  const weather = WEATHER[key];
-  const code = CITY_INFO[key].airport;
-  const flight = AIRPORTS[code].oneway * 2;
-  const dur = AIRPORTS[code].duration;
-  const dists = districtsOf(key);
-  const cur = currencyOfCity(key);
-  const hotels = dists.flatMap((d) => (HOTELS[d] || []).map(([n, p, r]) => `${n} ${money(p, cur)} ${r}★`)).join(", ");
-  const acts = dists.flatMap((d) => (ACTIVITIES[d] || []).map(([n, p]) => `${n} ${money(p, cur)}`)).join(", ");
-  return `${title(key)}: ${weather}°C; flight round-trip €${flight}/${dur}; hotels: ${hotels}; activities: ${acts} (hotel/activity prices in ${cur}, flight in EUR)`;
-}
-
 export const CATALOG = [
   {
     id: "get_airport_code",
@@ -399,27 +350,6 @@ export const CATALOG = [
     impl: getFlight
   },
   {
-    id: "get_one_way_fare",
-    name: "get_one_way_fare",
-    group: "Flights",
-    description: "One-way fare by airport code.",
-    parameters: { type: "object", properties: { airport: { type: "string" } }, required: ["airport"], additionalProperties: false },
-    impl: getOneWayFare
-  },
-  {
-    id: "get_flight_leg",
-    name: "get_flight_leg",
-    group: "Flights",
-    description: "Direct leg fare/time between HOME or airport codes.",
-    parameters: {
-      type: "object",
-      properties: { origin: { type: "string" }, destination: { type: "string" } },
-      required: ["origin", "destination"],
-      additionalProperties: false
-    },
-    impl: getFlightLeg
-  },
-  {
     id: "get_flight_schedule",
     name: "get_flight_schedule",
     group: "Flights",
@@ -499,22 +429,6 @@ export const CATALOG = [
     impl: calculator
   },
   {
-    id: "get_trip_cost",
-    name: "get_trip_cost",
-    group: "Cost",
-    description: "Bundled decoy trip cost estimate.",
-    parameters: { type: "object", properties: { city: { type: "string" }, nights: { type: "string" } }, required: ["city", "nights"], additionalProperties: false },
-    impl: getTripCost
-  },
-  {
-    id: "plan_vacation",
-    name: "plan_vacation",
-    group: "Cost",
-    description: "God tool summary for a city.",
-    parameters: { type: "object", properties: { city: { type: "string" } }, required: ["city"], additionalProperties: false },
-    impl: planVacation
-  },
-  {
     id: "get_checkin_rule",
     name: "get_checkin_rule",
     group: "Cost",
@@ -535,8 +449,6 @@ export const TOOL_DETAILS = {
   get_conditions: "Reads table:conditions. Use it for today's sunrise, sunset, or rain chance; combine sunset with time_math for time-based arrival requirements.",
   get_climate_average: "Reads table:climate. Use it only for historical seasonal averages, not current conditions.",
   get_flight: "Reads table:flights. Use it for the round-trip price and travel time for an airport.",
-  get_one_way_fare: "Reads table:flights. Use it when the question specifically needs a one-way ticket.",
-  get_flight_leg: "Reads table:flight_legs. Use it for a direct route between HOME and airport codes.",
   get_flight_schedule: "Reads table:departures. Use it with time_math for departure or arrival constraints.",
   list_hotels: "Reads table:hotels. Accepts one district and returns nightly per-person prices for comparisons.",
   get_hotel: "Reads table:hotels. Use it to retrieve the price and rating of a named hotel.",
@@ -545,27 +457,10 @@ export const TOOL_DETAILS = {
   get_exchange_rate: "Reads table:exchange_rates. Use it for the current mock conversion rate between two currencies.",
   time_math: "Uses verified clock times. Use it for time addition, subtraction, differences, and deadline comparisons.",
   calculator: "Uses verified numeric values only. Provide a bare arithmetic expression; use the result for totals, rates, or comparisons.",
-  get_trip_cost: "Reads table:flights and table:hotels. This is a simplified estimate and omits currency conversion and activities.",
-  plan_vacation: "Reads several travel tables. This broad summary is less precise than selecting the focused tools needed for a question.",
   get_checkin_rule: "Reads the airport check-in policy. Use it with schedules and time_math to determine airport arrival time."
 };
 export const BROKEN_ENABLED = new Set(["get_exchange_rate"]);
-export const REFERENCE_ENABLED = new Set([
-  "get_airport_code",
-  "list_districts",
-  "get_district",
-  "get_airport_transfer_time",
-  "get_currency",
-  "get_weather",
-  "get_conditions",
-  "get_flight",
-  "get_flight_schedule",
-  "list_hotels",
-  "list_activities",
-  "get_exchange_rate",
-  "time_math",
-  "calculator"
-]);
+export const REFERENCE_ENABLED = new Set(["get_exchange_rate"]);
 
 export function buildToolbox(enabledIds, descriptions = {}) {
   const enabled = new Set(enabledIds);
@@ -608,20 +503,6 @@ export function datasetTables() {
     "Flights/day": SCHEDULE[code].length
   }));
 
-  const points = ["HOME", ...Object.keys(AIRPORTS)];
-  const seen = new Set();
-  const legs = [];
-  for (const a of points) {
-    for (const b of points) {
-      if (a === b) continue;
-      const key = legKey(a, b);
-      if (seen.has(key) || !LEGS[key]) continue;
-      seen.add(key);
-      const [price, dur] = LEGS[key];
-      legs.push({ From: a, To: b, "€": price, Time: dur });
-    }
-  }
-
   const schedule = Object.entries(SCHEDULE).flatMap(([code, deps]) => deps.map(([flight, dep, arr, dur]) => ({
     Airport: code,
     Route: `Home→${code}`,
@@ -663,7 +544,6 @@ export function datasetTables() {
     { name: "table:weather", label: "Weather", description: "Current and historical city temperatures.", rows: temperature },
     { name: "table:conditions", label: "Conditions", description: "Daily rain chance, sunrise, and sunset.", rows: conditions },
     { name: "table:flights", label: "Flights", description: "Airport-based one-way and round-trip fares.", rows: flights },
-    { name: "table:flight_legs", label: "Flight legs", description: "Direct route fares and durations.", rows: legs },
     { name: "table:departures", label: "Departures", description: "Scheduled Home-to-airport departure and arrival times.", rows: schedule },
     { name: "table:districts", label: "Districts", description: "District-to-city mapping and airport transfer time.", rows: districts },
     { name: "table:hotels", label: "Hotels", description: "District-level nightly hotel prices and ratings.", rows: hotels },

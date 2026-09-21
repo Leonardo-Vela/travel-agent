@@ -1,5 +1,3 @@
-export const CITIES = ["Barcelona", "Prague", "London", "Zurich", "Istanbul", "Budapest"];
-
 export const CITY_INFO = {
   barcelona: { airport: "BCN", country: "Spain", currency: "EUR" },
   prague: { airport: "PRG", country: "Czechia", currency: "CZK" },
@@ -52,27 +50,6 @@ export const AIRPORTS = {
   ZRH: { oneway: 55, duration: "1h20" },
   IST: { oneway: 130, duration: "3h00" },
   BUD: { oneway: 60, duration: "1h40" }
-};
-
-const legKey = (a, b) => [a.trim().toUpperCase(), b.trim().toUpperCase()].sort().join("|");
-
-export const LEGS = {
-  [legKey("HOME", "BCN")]: [90, "2h20"],
-  [legKey("HOME", "PRG")]: [45, "1h10"],
-  [legKey("HOME", "LHR")]: [70, "1h50"],
-  [legKey("HOME", "ZRH")]: [55, "1h20"],
-  [legKey("HOME", "IST")]: [130, "3h00"],
-  [legKey("HOME", "BUD")]: [60, "1h40"],
-  [legKey("BCN", "LHR")]: [85, "2h00"],
-  [legKey("BCN", "ZRH")]: [75, "1h40"],
-  [legKey("BCN", "IST")]: [140, "3h10"],
-  [legKey("LHR", "ZRH")]: [90, "1h30"],
-  [legKey("LHR", "BUD")]: [100, "2h20"],
-  [legKey("ZRH", "PRG")]: [80, "1h20"],
-  [legKey("ZRH", "BUD")]: [85, "1h30"],
-  [legKey("PRG", "BUD")]: [55, "1h05"],
-  [legKey("PRG", "IST")]: [120, "2h40"],
-  [legKey("BUD", "IST")]: [95, "1h50"]
 };
 
 export const SCHEDULE = {
@@ -173,4 +150,3 @@ export const ACTIVITIES = {
 
 export const CHECKIN_MINUTES = 90;
 
-export { legKey };

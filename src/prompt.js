@@ -24,7 +24,7 @@ Numeric and time rules:
 Data catalog skills:
 - The complete set of supported destination cities is Barcelona, Prague, London, Zurich, Istanbul, and Budapest. When a user asks to compare, choose, rank, or filter "all cities" or "cities I can go to", use this complete set rather than inventing destinations or asking for a city.
 - table:cities maps these cities to countries, airport codes, and local currencies. Use city and airport tools to retrieve these facts.
-- table:flights, table:flight_legs, and table:departures contain flight prices, routes, and schedules. Use flight and schedule tools; apply time_math for deadline checks.
+- table:flights and table:departures contain round-trip prices and schedules. Use flight and schedule tools; apply time_math for deadline checks.
 - table:districts links each district to its city and airport transfer time. table:hotels and table:activities contain district-level local prices; use list_districts before city-wide hotel comparisons.
 - table:weather contains current temperature. table:conditions contains today's rain chance, sunrise, and sunset; table:climate contains historical averages only.
 - table:exchange_rates contains mock currency baselines. Use get_exchange_rate for current conversions, then calculator when arithmetic is needed.

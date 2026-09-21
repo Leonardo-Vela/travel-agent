@@ -3,11 +3,12 @@ import assert from "node:assert/strict";
 import { buildToolbox, CATALOG_BY_ID, REFERENCE_ENABLED } from "../src/tools.js";
 import { verifiedTargetRate } from "../src/agent.js";
 
-test("reference tools include schedule and time math", () => {
-  assert.equal(REFERENCE_ENABLED.has("get_flight_schedule"), true);
-  assert.equal(REFERENCE_ENABLED.has("time_math"), true);
-  assert.equal(REFERENCE_ENABLED.has("get_airport_transfer_time"), true);
-  assert.equal(REFERENCE_ENABLED.has("get_conditions"), true);
+test("only exchange rate is enabled by default", () => {
+  assert.deepEqual([...REFERENCE_ENABLED], ["get_exchange_rate"]);
+  assert.equal(CATALOG_BY_ID.get_one_way_fare, undefined);
+  assert.equal(CATALOG_BY_ID.get_flight_leg, undefined);
+  assert.equal(CATALOG_BY_ID.get_trip_cost, undefined);
+  assert.equal(CATALOG_BY_ID.plan_vacation, undefined);
 });
 
 test("conditions tool returns a city's sunset", () => {
