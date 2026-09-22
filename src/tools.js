@@ -460,7 +460,7 @@ export const TOOL_DETAILS = {
   get_checkin_rule: "Reads the airport check-in policy. Use it with schedules and time_math to determine airport arrival time."
 };
 export const BROKEN_ENABLED = new Set(["get_exchange_rate"]);
-export const REFERENCE_ENABLED = new Set(["get_exchange_rate"]);
+export const REFERENCE_ENABLED = new Set();
 
 export function buildToolbox(enabledIds, descriptions = {}) {
   const enabled = new Set(enabledIds);

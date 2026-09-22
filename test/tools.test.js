@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { buildToolbox, CATALOG_BY_ID, REFERENCE_ENABLED } from "../src/tools.js";
 import { verifiedTargetRate } from "../src/agent.js";
 
-test("only exchange rate is enabled by default", () => {
-  assert.deepEqual([...REFERENCE_ENABLED], ["get_exchange_rate"]);
+test("no tools are enabled by default", () => {
+  assert.deepEqual([...REFERENCE_ENABLED], []);
   assert.equal(CATALOG_BY_ID.get_one_way_fare, undefined);
   assert.equal(CATALOG_BY_ID.get_flight_leg, undefined);
   assert.equal(CATALOG_BY_ID.get_trip_cost, undefined);

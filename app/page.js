@@ -31,7 +31,7 @@ function renderAssistantContent(content) {
   });
 }
 
-const TOOL_CONFIG_KEY = "travel-agent-tool-config-v5";
+const TOOL_CONFIG_KEY = "travel-agent-tool-config-v6";
 
 const TOOL_GROUPS = ["Directory", "Weather", "Flights", "Hotels", "Activities", "Cost"];
 
